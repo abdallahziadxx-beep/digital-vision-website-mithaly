@@ -558,6 +558,10 @@
                             <i class="fas fa-money-bill-wave ml-3"></i>
                             <span>العملات</span>
                         </a>
+                        <a href="#" onclick="app.loadAdminPage('fileManagement')" class="admin-nav-item">
+                            <i class="fas fa-file-alt ml-3"></i>
+                            <span>إدارة الملفات</span>
+                        </a>
                         <a href="#" onclick="app.loadAdminPage('settings')" class="admin-nav-item">
                             <i class="fas fa-cog ml-3"></i>
                             <span>الإعدادات</span>
@@ -605,106 +609,255 @@
     </template>
 
     <script>
+        // ==================== نظام إدارة الملفات ====================
+        class FileManager {
+            constructor() {
+                this.configFile = 'config.json';
+                this.currentData = null;
+            }
+            
+            // تحميل البيانات من الملف
+            async loadConfig() {
+                try {
+                    const response = await fetch(this.configFile);
+                    if (!response.ok) throw new Error('لم يتم العثور على ملف التكوين');
+                    
+                    this.currentData = await response.json();
+                    console.log('تم تحميل الإعدادات من الملف:', this.currentData);
+                    return this.currentData;
+                } catch (error) {
+                    console.error('خطأ في تحميل الإعدادات:', error);
+                    return this.loadDefaultConfig();
+                }
+            }
+            
+            // تحميل الإعدادات الافتراضية
+            loadDefaultConfig() {
+                const defaultConfig = {
+                    "version": "3.0",
+                    "settings": {
+                        "companyName": "الميثالي للتجارة",
+                        "phone": "775555590",
+                        "whatsapp": "967775555590",
+                        "email": "info@mithali.com",
+                        "address": "صنعاء، اليمن",
+                        "currency": "ريال يمني",
+                        "taxRate": 5,
+                        "shippingCost": 50000,
+                        "adminPassword": "admin123",
+                        "logo": "",
+                        "founderName": "محمد الميثالي",
+                        "founderPosition": "المؤسس والرئيس التنفيذي",
+                        "founderBio": "مؤسس شركة الميثالي للتجارة بخبرة تزيد عن 30 عاماً في مجال المعدات الزراعية",
+                        "founderImage": "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    },
+                    "currencies": [
+                        { "id": 1, "code": "ريال يمني", "symbol": "ر.ي", "rate": 1, "isDefault": true },
+                        { "id": 2, "code": "دولار", "symbol": "$", "rate": 530, "isDefault": false },
+                        { "id": 3, "code": "ريال سعودي", "symbol": "ر.س", "rate": 141, "isDefault": false }
+                    ],
+                    "categories": [
+                        { "id": 1, "name": "جرارات", "description": "جميع أنواع الجرارات والحراثات", "image": "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
+                        { "id": 2, "name": "قطع غيار", "description": "قطع غيار أصلية للجرارات والمعدات الزراعية", "image": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
+                        { "id": 3, "name": "إطارات", "description": "إطارات زراعية وجرارات", "image": "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
+                        { "id": 4, "name": "محركات", "description": "محركات ديزل وجرارات", "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }
+                    ],
+                    "products": [
+                        {
+                            "id": 1,
+                            "name": "حراثة Indo Farm 4WD",
+                            "description": "حراثة قوية 4x4 بمحرك ديزل 45 حصان، مناسبة للأراضي اليمنية الوعرة.",
+                            "category": "جرارات",
+                            "price": 125000000,
+                            "stock": 8,
+                            "minStock": 3,
+                            "status": "متوفر",
+                            "image": "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                            "features": ["4x4 دفع رباعي", "45 حصان", "ديزل", "ناقل حركة ميكانيكي"],
+                            "createdAt": "2024-01-15"
+                        },
+                        {
+                            "id": 2,
+                            "name": "فلتر ديزل أصلي",
+                            "description": "فلتر ديزل عالي الجودة يناسب معظم موديلات الجرارات.",
+                            "category": "قطع غيار",
+                            "price": 45000,
+                            "stock": 50,
+                            "minStock": 10,
+                            "status": "متوفر",
+                            "image": "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                            "features": ["أصلي", "عالي الجودة", "طويل الأمد"],
+                            "createdAt": "2024-01-10"
+                        },
+                        {
+                            "id": 3,
+                            "name": "إطارات زراعية 16.9-30",
+                            "description": "إطارات زراعية عالية الجودة مصممة للتربة الرطبة والجافة.",
+                            "category": "إطارات",
+                            "price": 850000,
+                            "stock": 15,
+                            "minStock": 5,
+                            "status": "متوفر",
+                            "image": "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                            "features": ["مقاس 16.9-30", "عمر طويل", "مناسب لجميع الترب"],
+                            "createdAt": "2024-01-12"
+                        }
+                    ],
+                    "orders": [],
+                    "customers": [],
+                    "messages": [],
+                    "cart": [],
+                    "notifications": []
+                };
+                
+                this.currentData = defaultConfig;
+                return defaultConfig;
+            }
+            
+            // حفظ البيانات إلى localStorage
+            saveToLocalStorage(config) {
+                if (!config) return;
+                
+                localStorage.setItem('mithali_settings', JSON.stringify(config.settings || {}));
+                localStorage.setItem('mithali_currencies', JSON.stringify(config.currencies || []));
+                localStorage.setItem('mithali_categories', JSON.stringify(config.categories || []));
+                localStorage.setItem('mithali_products', JSON.stringify(config.products || []));
+                localStorage.setItem('mithali_orders', JSON.stringify(config.orders || []));
+                localStorage.setItem('mithali_customers', JSON.stringify(config.customers || []));
+                localStorage.setItem('mithali_messages', JSON.stringify(config.messages || []));
+                localStorage.setItem('mithali_cart', JSON.stringify(config.cart || []));
+                localStorage.setItem('mithali_notifications', JSON.stringify(config.notifications || []));
+                localStorage.setItem('mithali_version', config.version || '3.0');
+                
+                console.log('تم حفظ الإعدادات في localStorage');
+            }
+            
+            // تحميل البيانات من localStorage
+            loadFromLocalStorage() {
+                const config = {
+                    version: localStorage.getItem('mithali_version') || '3.0',
+                    settings: JSON.parse(localStorage.getItem('mithali_settings') || '{}'),
+                    currencies: JSON.parse(localStorage.getItem('mithali_currencies') || '[]'),
+                    categories: JSON.parse(localStorage.getItem('mithali_categories') || '[]'),
+                    products: JSON.parse(localStorage.getItem('mithali_products') || '[]'),
+                    orders: JSON.parse(localStorage.getItem('mithali_orders') || '[]'),
+                    customers: JSON.parse(localStorage.getItem('mithali_customers') || '[]'),
+                    messages: JSON.parse(localStorage.getItem('mithali_messages') || '[]'),
+                    cart: JSON.parse(localStorage.getItem('mithali_cart') || '[]'),
+                    notifications: JSON.parse(localStorage.getItem('mithali_notifications') || '[]')
+                };
+                
+                this.currentData = config;
+                return config;
+            }
+            
+            // تصدير البيانات إلى ملف
+            async exportToFile(filename = 'mithali-config.json') {
+                try {
+                    const config = this.loadFromLocalStorage();
+                    const dataStr = JSON.stringify(config, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', filename);
+                    linkElement.click();
+                    
+                    console.log('تم تصدير البيانات إلى ملف:', filename);
+                    return true;
+                } catch (error) {
+                    console.error('خطأ في تصدير البيانات:', error);
+                    return false;
+                }
+            }
+            
+            // استيراد البيانات من ملف
+            async importFromFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            this.currentData = config;
+                            this.saveToLocalStorage(config);
+                            console.log('تم استيراد البيانات من الملف:', file.name);
+                            resolve(config);
+                        } catch (error) {
+                            console.error('خطأ في تحليل ملف JSON:', error);
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = (error) => {
+                        console.error('خطأ في قراءة الملف:', error);
+                        reject(error);
+                    };
+                    
+                    reader.readAsText(file);
+                });
+            }
+            
+            // حفظ الصورة كـ base64
+            async saveImageToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        resolve(e.target.result);
+                    };
+                    
+                    reader.onerror = (error) => {
+                        reject(error);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // تحديث البيانات الحالية
+            updateCurrentData(newData) {
+                this.currentData = { ...this.currentData, ...newData };
+            }
+            
+            // الحصول على إعدادات معينة
+            getSetting(key) {
+                return this.currentData?.settings?.[key] || '';
+            }
+            
+            // تحديث إعداد معين
+            updateSetting(key, value) {
+                if (this.currentData && this.currentData.settings) {
+                    this.currentData.settings[key] = value;
+                    this.saveToLocalStorage(this.currentData);
+                }
+            }
+        }
+
         // ==================== نظام إدارة البيانات ====================
         class DataManager {
             constructor() {
+                this.fileManager = new FileManager();
                 this.initDatabase();
             }
             
-            initDatabase() {
-                if (!localStorage.getItem('mithali_settings')) {
-                    this.setDefaultData();
+            async initDatabase() {
+                // أولاً حاول تحميل البيانات من الملف
+                try {
+                    const config = await this.fileManager.loadConfig();
+                    this.fileManager.saveToLocalStorage(config);
+                } catch (error) {
+                    // إذا فشل، استخدم البيانات الافتراضية
+                    console.log('استخدام البيانات الافتراضية');
+                    this.fileManager.loadDefaultConfig();
+                    this.fileManager.saveToLocalStorage(this.fileManager.currentData);
                 }
                 
-                // تحديث الإصدار
-                localStorage.setItem('mithali_version', '3.0');
-            }
-            
-            setDefaultData() {
-                const settings = {
-                    companyName: "الميثالي للتجارة",
-                    phone: "775555590",
-                    whatsapp: "967775555590",
-                    email: "info@mithali.com",
-                    address: "صنعاء، اليمن",
-                    currency: "ريال يمني",
-                    taxRate: 5,
-                    shippingCost: 50000,
-                    adminPassword: "admin123",
-                    logo: "",
-                    founderName: "محمد الميثالي",
-                    founderPosition: "المؤسس والرئيس التنفيذي",
-                    founderBio: "مؤسس شركة الميثالي للتجارة بخبرة تزيد عن 30 عاماً في مجال المعدات الزراعية",
-                    founderImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                };
-                
-                // العملات الافتراضية
-                const currencies = [
-                    { id: 1, code: "ريال يمني", symbol: "ر.ي", rate: 1, isDefault: true },
-                    { id: 2, code: "دولار", symbol: "$", rate: 530, isDefault: false },
-                    { id: 3, code: "ريال سعودي", symbol: "ر.س", rate: 141, isDefault: false }
-                ];
-                
-                // الأصناف الافتراضية
-                const categories = [
-                    { id: 1, name: "جرارات", description: "جميع أنواع الجرارات والحراثات", image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-                    { id: 2, name: "قطع غيار", description: "قطع غيار أصلية للجرارات والمعدات الزراعية", image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-                    { id: 3, name: "إطارات", description: "إطارات زراعية وجرارات", image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-                    { id: 4, name: "محركات", description: "محركات ديزل وجرارات", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }
-                ];
-                
-                // المنتجات الافتراضية
-                const products = [
-                    {
-                        id: 1,
-                        name: "حراثة Indo Farm 4WD",
-                        description: "حراثة قوية 4x4 بمحرك ديزل 45 حصان، مناسبة للأراضي اليمنية الوعرة.",
-                        category: "جرارات",
-                        price: 125000000,
-                        stock: 8,
-                        minStock: 3,
-                        status: "متوفر",
-                        image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                        features: ["4x4 دفع رباعي", "45 حصان", "ديزل", "ناقل حركة ميكانيكي"],
-                        createdAt: "2024-01-15"
-                    },
-                    {
-                        id: 2,
-                        name: "فلتر ديزل أصلي",
-                        description: "فلتر ديزل عالي الجودة يناسب معظم موديلات الجرارات.",
-                        category: "قطع غيار",
-                        price: 45000,
-                        stock: 50,
-                        minStock: 10,
-                        status: "متوفر",
-                        image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                        features: ["أصلي", "عالي الجودة", "طويل الأمد"],
-                        createdAt: "2024-01-10"
-                    },
-                    {
-                        id: 3,
-                        name: "إطارات زراعية 16.9-30",
-                        description: "إطارات زراعية عالية الجودة مصممة للتربة الرطبة والجافة.",
-                        category: "إطارات",
-                        price: 850000,
-                        stock: 15,
-                        minStock: 5,
-                        status: "متوفر",
-                        image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                        features: ["مقاس 16.9-30", "عمر طويل", "مناسب لجميع الترب"],
-                        createdAt: "2024-01-12"
-                    }
-                ];
-                
-                localStorage.setItem('mithali_settings', JSON.stringify(settings));
-                localStorage.setItem('mithali_currencies', JSON.stringify(currencies));
-                localStorage.setItem('mithali_categories', JSON.stringify(categories));
-                localStorage.setItem('mithali_products', JSON.stringify(products));
-                localStorage.setItem('mithali_orders', JSON.stringify([]));
-                localStorage.setItem('mithali_customers', JSON.stringify([]));
-                localStorage.setItem('mithali_messages', JSON.stringify([]));
-                localStorage.setItem('mithali_cart', JSON.stringify([]));
-                localStorage.setItem('mithali_notifications', JSON.stringify([]));
+                // تحقق من وجود localStorage
+                if (!localStorage.getItem('mithali_settings')) {
+                    const defaultConfig = this.fileManager.loadDefaultConfig();
+                    this.fileManager.saveToLocalStorage(defaultConfig);
+                }
             }
             
             // ============ وظائف عامة ============
@@ -1037,7 +1190,8 @@
                 this.init();
             }
             
-            init() {
+            async init() {
+                await this.dataManager.initDatabase();
                 this.renderCustomerInterface();
                 this.setupEventListeners();
                 this.updateCartCount();
@@ -1589,6 +1743,10 @@
                             title.textContent = 'الرسائل';
                             this.renderAdminMessages();
                             break;
+                        case 'fileManagement':
+                            contentArea.innerHTML = this.getAdminFileManagementContent();
+                            title.textContent = 'إدارة الملفات';
+                            break;
                         case 'settings':
                             contentArea.innerHTML = this.getAdminSettingsContent();
                             title.textContent = 'الإعدادات';
@@ -1619,6 +1777,7 @@
                     'orders': 'الطلبات',
                     'customers': 'العملاء',
                     'messages': 'الرسائل',
+                    'fileManagement': 'إدارة الملفات',
                     'settings': 'الإعدادات'
                 };
                 return titles[page] || page;
@@ -3295,6 +3454,189 @@
                 this.updateAdminStats();
             }
             
+            getAdminFileManagementContent() {
+                return `
+                    <div class="fade-in">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">إدارة الملفات والإعدادات</h2>
+                                <p class="text-gray-600">تصدير واستيراد البيانات وإدارة الملفات</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- تصدير البيانات -->
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-6">تصدير البيانات</h3>
+                                <div class="space-y-4">
+                                    <p class="text-gray-600">تصدير جميع بيانات المتجر (الإعدادات، المنتجات، الطلبات، إلخ) إلى ملف JSON.</p>
+                                    <button onclick="app.exportData()" class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center">
+                                        <i class="fas fa-download ml-2"></i>
+                                        تصدير جميع البيانات
+                                    </button>
+                                    <p class="text-sm text-gray-500">سيتم تنزيل ملف config.json يحتوي على جميع بيانات النظام</p>
+                                </div>
+                            </div>
+                            
+                            <!-- استيراد البيانات -->
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-6">استيراد البيانات</h3>
+                                <div class="space-y-4">
+                                    <p class="text-gray-600">استيراد بيانات من ملف JSON مسبق التصدير.</p>
+                                    <div>
+                                        <input type="file" id="import-file" accept=".json" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+                                        <button onclick="app.importData()" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                                            <i class="fas fa-upload ml-2"></i>
+                                            استيراد البيانات
+                                        </button>
+                                    </div>
+                                    <p class="text-sm text-red-500">تحذير: سيتم استبدال جميع البيانات الحالية بالبيانات المستوردة</p>
+                                </div>
+                            </div>
+                            
+                            <!-- إدارة الصور -->
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-6">إدارة الصور</h3>
+                                <div class="space-y-4">
+                                    <p class="text-gray-600">رفع الصور وتخزين روابطها تلقائياً.</p>
+                                    <div>
+                                        <input type="file" id="image-upload" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+                                        <button onclick="app.uploadImage()" class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center">
+                                            <i class="fas fa-image ml-2"></i>
+                                            رفع صورة
+                                        </button>
+                                    </div>
+                                    <div id="image-preview" class="hidden">
+                                        <p class="text-sm text-gray-600 mb-2">رابط الصورة:</p>
+                                        <input type="text" id="image-url" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2" readonly>
+                                        <button onclick="app.copyImageUrl()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                                            نسخ الرابط
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- معلومات النظام -->
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-6">معلومات النظام</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">إصدار النظام:</span>
+                                        <span class="font-bold">${localStorage.getItem('mithali_version') || '3.0'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">عدد المنتجات:</span>
+                                        <span class="font-bold">${this.dataManager.getProducts().length}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">عدد الطلبات:</span>
+                                        <span class="font-bold">${this.dataManager.getOrders().length}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">عدد العملاء:</span>
+                                        <span class="font-bold">${this.dataManager.getCustomers().length}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">حجم البيانات:</span>
+                                        <span class="font-bold">${Math.round(JSON.stringify(localStorage).length / 1024)} كيلوبايت</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            async exportData() {
+                try {
+                    const fileManager = new FileManager();
+                    const success = await fileManager.exportToFile(`mithali-backup-${new Date().toISOString().split('T')[0]}.json`);
+                    
+                    if (success) {
+                        this.showToast('تم تصدير البيانات بنجاح', 'success');
+                    } else {
+                        this.showToast('حدث خطأ أثناء التصدير', 'error');
+                    }
+                } catch (error) {
+                    console.error('خطأ في التصدير:', error);
+                    this.showToast('حدث خطأ أثناء التصدير', 'error');
+                }
+            }
+            
+            async importData() {
+                const fileInput = document.getElementById('import-file');
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showToast('يرجى اختيار ملف JSON', 'error');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'استيراد البيانات',
+                    text: 'هل أنت متأكد من رغبتك في استيراد البيانات؟ سيتم استبدال جميع البيانات الحالية.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، استورد',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#ef4444'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const fileManager = new FileManager();
+                            const config = await fileManager.importFromFile(fileInput.files[0]);
+                            
+                            this.showToast('تم استيراد البيانات بنجاح', 'success');
+                            this.dataManager.addNotification('استيراد بيانات', 'تم استيراد جميع البيانات من ملف النسخ الاحتياطي');
+                            
+                            // إعادة تحميل الصفحة
+                            setTimeout(() => location.reload(), 1500);
+                        } catch (error) {
+                            this.showToast('خطأ في استيراد البيانات: ' + error.message, 'error');
+                        }
+                    }
+                });
+            }
+            
+            async uploadImage() {
+                const fileInput = document.getElementById('image-upload');
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    this.showToast('يرجى اختيار صورة', 'error');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                
+                // تحقق من حجم الصورة (حد أقصى 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showToast('حجم الصورة كبير جداً (الحد الأقصى 5MB)', 'error');
+                    return;
+                }
+                
+                try {
+                    const fileManager = new FileManager();
+                    const base64Image = await fileManager.saveImageToBase64(file);
+                    
+                    // عرض الرابط
+                    const preview = document.getElementById('image-preview');
+                    const urlInput = document.getElementById('image-url');
+                    
+                    urlInput.value = base64Image;
+                    preview.classList.remove('hidden');
+                    
+                    this.showToast('تم تحويل الصورة إلى رابط', 'success');
+                } catch (error) {
+                    this.showToast('خطأ في معالجة الصورة', 'error');
+                }
+            }
+            
+            copyImageUrl() {
+                const urlInput = document.getElementById('image-url');
+                urlInput.select();
+                document.execCommand('copy');
+                this.showToast('تم نسخ رابط الصورة', 'success');
+            }
+            
             getAdminSettingsContent() {
                 const settings = this.dataManager.getSettings();
                 
@@ -3488,31 +3830,6 @@
                 this.dataManager.saveSettings(settings);
                 this.showToast('تم حفظ معلومات المؤسس بنجاح');
             }
-            
-            changePassword(event) {
-                const currentPassword = document.getElementById('current-password').value;
-                const newPassword = document.getElementById('new-password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-                
-                if (!this.dataManager.checkAdminPassword(currentPassword)) {
-                    this.showToast('كلمة المرور الحالية غير صحيحة', 'error');
-                    return;
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    this.showToast('كلمات المرور غير متطابقة', 'error');
-                    return;
-                }
-                
-                if (newPassword.length < 6) {
-                    this.showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
-                    return;
-                }
-                
-                this.dataManager.changeAdminPassword(newPassword);
-                this.showToast('تم تغيير كلمة المرور بنجاح');
-                event.target.reset();
-            }
         }
 
         // ==================== تهيئة التطبيق ====================
@@ -3569,4 +3886,4 @@
         document.head.appendChild(fabStyles);
     </script>
 </body>
-                          </html>
+                                                           </html>
